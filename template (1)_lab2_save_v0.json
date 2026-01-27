@@ -37,6 +37,14 @@
         "virtualNetworks_VNET_LAB1_externalid": {
             "defaultValue": "/subscriptions/32e618b3-d646-4f18-9492-f0a90957ad16/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/virtualNetworks/VNET-LAB1",
             "type": "String"
+        },
+        "publicIPAddresses_LB_WEB_name": {
+            "defaultValue": "LB-WEB-ip",
+            "type": "String"
+        },
+        "loadBalancers_WEB_name": {
+            "defaultValue": "LB-WEB",
+            "type": "String"
         }
     },
     "variables": {},
@@ -124,6 +132,28 @@
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2024-07-01",
             "name": "[parameters('publicIPAddresses_WEB2_ip_name')]",
+            "location": "canadacentral",
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
+            "zones": [
+                "2"
+            ],
+            "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": [],
+                "ddosSettings": {
+                    "protectionMode": "VirtualNetworkInherited"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2024-07-01",
+            "name": "[parameters('publicIPAddresses_LB_WEB_name')]",
             "location": "canadacentral",
             "sku": {
                 "name": "Standard",
@@ -393,7 +423,8 @@
             "location": "canadacentral",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_WEB1_ip_name'))]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_NSG_WEB_name'))]"
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_NSG_WEB_name'))]",
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_WEB_name'))]"
             ],
             "kind": "Regular",
             "properties": {
@@ -403,19 +434,17 @@
                         "id": "[concat(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_web118_z2_name')), '/ipConfigurations/ipconfig1')]",
                         "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
                         "properties": {
-                            "privateIPAddress": "10.0.1.4",
                             "privateIPAllocationMethod": "Dynamic",
-                            "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_WEB1_ip_name'))]",
-                                "properties": {
-                                    "deleteOption": "Detach"
-                                }
-                            },
                             "subnet": {
                                 "id": "[concat(parameters('virtualNetworks_VNET_LAB1_externalid'), '/subnets/SUBNET-WEB')]"
                             },
                             "primary": true,
-                            "privateIPAddressVersion": "IPv4"
+                            "privateIPAddressVersion": "IPv4",
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_WEB_name')), '/backendAddressPools/WEB-BackendPool')]"
+                                }
+                            ]
                         }
                     }
                 ],
@@ -440,7 +469,8 @@
             "location": "canadacentral",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_WEB2_ip_name'))]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_NSG_WEB_name'))]"
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_NSG_WEB_name'))]",
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_WEB_name'))]"
             ],
             "kind": "Regular",
             "properties": {
@@ -450,19 +480,17 @@
                         "id": "[concat(resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_web218_z2_name')), '/ipConfigurations/ipconfig1')]",
                         "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
                         "properties": {
-                            "privateIPAddress": "10.0.1.4",
                             "privateIPAllocationMethod": "Dynamic",
-                            "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_WEB2_ip_name'))]",
-                                "properties": {
-                                    "deleteOption": "Detach"
-                                }
-                            },
                             "subnet": {
                                 "id": "[concat(parameters('virtualNetworks_VNET_LAB1_externalid'), '/subnets/SUBNET-WEB')]"
                             },
                             "primary": true,
-                            "privateIPAddressVersion": "IPv4"
+                            "privateIPAddressVersion": "IPv4",
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_WEB_name')), '/backendAddressPools/WEB-BackendPool')]"
+                                }
+                            ]
                         }
                     }
                 ],
@@ -511,7 +539,69 @@
                 },
                 "diskSizeGB": 16
             }
+        },
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2024-07-01",
+            "name": "[parameters('loadBalancers_WEB_name')]",
+            "location": "canadacentral",
+            "sku": {
+                "name": "Standard"
+            },
+            "dependsOn": [
+            "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_LB_WEB_name'))]"
+            ],
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "LB-Frontend",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_LB_WEB_name'))]"
+                            }
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "WEB-BackendPool"
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "HTTP-80-Probe",
+                        "properties": {
+                            "protocol": "Http",
+                            "port": 80,
+                            "requestPath": "/",
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 2
+                        }
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "HTTP-80-Rule",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "frontendPort": 80,
+                            "backendPort": 80,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "loadDistribution": "Default",
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_WEB_name')), '/frontendIPConfigurations/LB-Frontend')]"
+                            },
+                            "backendAddressPool":{
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_WEB_name')), '/backendAddressPools/WEB-BackendPool')]"
+                            },
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_WEB_name')), '/probes/HTTP-80-Probe')]"
+                            }
+                        }
+                    }
+                ]
+            }
         }
-
     ]
 }
