@@ -424,7 +424,7 @@
             "name": "[parameters('networkInterfaces_web118_z2_name')]",
             "location": "canadacentral",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_WEB1_ip_name'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', 'WEB1-ip')]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_NSG_WEB_name'))]",
                 "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_WEB_name'))]"
             ],
@@ -438,7 +438,7 @@
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
-                                "id": "[concat(parameters('virtualNetworks_VNET_LAB1_externalid'), '/subnets/SUBNET-WEB')]"
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'WEB1-ip')]"
                             },
                             "primary": true,
                             "privateIPAddressVersion": "IPv4",
@@ -470,7 +470,7 @@
             "name": "[parameters('networkInterfaces_web218_z2_name')]",
             "location": "canadacentral",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_WEB2_ip_name'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', 'WEB2-ip')]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_NSG_WEB_name'))]",
                 "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_WEB_name'))]"
             ],
@@ -484,7 +484,7 @@
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
-                                "id": "[concat(parameters('virtualNetworks_VNET_LAB1_externalid'), '/subnets/SUBNET-WEB')]"
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'WEB2-ip')]"
                             },
                             "primary": true,
                             "privateIPAddressVersion": "IPv4",
