@@ -437,8 +437,11 @@
                         "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_WEB1_ip_name'))]"
+                            },
                             "subnet": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'WEB1-ip')]"
+                              "id": "[concat(parameters('virtualNetworks_VNET_LAB1_externalid'), '/subnets/SUBNET-WEB')]"
                             },
                             "primary": true,
                             "privateIPAddressVersion": "IPv4",
@@ -483,8 +486,11 @@
                         "type": "Microsoft.Network/networkInterfaces/ipConfigurations",
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                            "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_WEB2_ip_name'))]"
+                            },
                             "subnet": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'WEB2-ip')]"
+                                "id": "[concat(parameters('virtualNetworks_VNET_LAB1_externalid'), '/subnets/SUBNET-WEB')]"
                             },
                             "primary": true,
                             "privateIPAddressVersion": "IPv4",
