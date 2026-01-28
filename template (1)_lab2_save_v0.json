@@ -246,7 +246,8 @@
                         }
                     },
                     "secrets": [],
-                    "allowExtensionOperations": true
+                    "allowExtensionOperations": true,
+                    "customData": "[base64(concat('#cloud-config\n','package_update: true\n','packages:\n','  - apache2\n','write_files:\n','  - path: /var/www/html/index.html\n','    permissions: \"0644\"\n','    owner: root:root\n','    content: |\n','      <html><body><h1>', parameters('virtualMachines_WEB1_name'), '</h1></body></html>\n','runcmd:\n','  - systemctl enable apache2\n','  - systemctl restart apache2\n'))]"
                 },
                 "securityProfile": {
                     "uefiSettings": {
@@ -346,7 +347,8 @@
                         }
                     },
                     "secrets": [],
-                    "allowExtensionOperations": true
+                    "allowExtensionOperations": true,
+                    "customData": "[base64(concat('#cloud-config\n','package_update: true\n','packages:\n','  - apache2\n','write_files:\n','  - path: /var/www/html/index.html\n','    permissions: \"0644\"\n','    owner: root:root\n','    content: |\n','      <html><body><h1>', parameters('virtualMachines_WEB2_name'), '</h1></body></html>\n','runcmd:\n','  - systemctl enable apache2\n','  - systemctl restart apache2\n'))]"
                 },
                 "securityProfile": {
                     "uefiSettings": {
