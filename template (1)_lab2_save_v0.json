@@ -46,6 +46,7 @@
             "defaultValue": "LB-WEB",
             "type": "String"
         }
+
     },
     "variables": {},
     "resources": [
@@ -106,6 +107,47 @@
                 ]
             }
         },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2025-05-01",
+            "name": "VNET-LAB1",
+            "location": "canadacentral",
+            "properties": {
+                "addressSpace": {
+                "addressPrefixes": [
+                    "10.0.0.0/16"
+                ]
+                },
+                "encryption": {
+                "enabled": false,
+                "enforcement": "AllowUnencrypted"
+                },
+                "privateEndpointVNetPolicies": "Disabled",
+                "subnets": [
+                {
+                    "name": "default",
+                    "properties": {
+                    "addressPrefixes": [
+                        "10.0.0.0/24"
+                    ],
+                    "privateEndpointNetworkPolicies": "Disabled",
+                    "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                },
+                {
+                    "name": "SUBNET-WEB",
+                    "properties": {
+                    "addressPrefixes": [
+                        "10.0.1.0/24"
+                    ],
+                    "privateEndpointNetworkPolicies": "Disabled",
+                    "privateLinkServiceNetworkPolicies": "Enabled"
+                    }
+                }
+                ],
+                "enableDdosProtection": false
+            }
+            },
         {
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2024-07-01",
@@ -441,7 +483,7 @@
                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_WEB1_ip_name'))]"
                             },
                             "subnet": {
-                              "id": "[concat(parameters('virtualNetworks_VNET_LAB1_externalid'), '/subnets/SUBNET-WEB')]"
+                              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'VNET-LAB1', 'SUBNET-WEB')]"
                             },
                             "primary": true,
                             "privateIPAddressVersion": "IPv4",
@@ -490,7 +532,7 @@
                             "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_WEB2_ip_name'))]"
                             },
                             "subnet": {
-                                "id": "[concat(parameters('virtualNetworks_VNET_LAB1_externalid'), '/subnets/SUBNET-WEB')]"
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'VNET-LAB1', 'SUBNET-WEB')]"
                             },
                             "primary": true,
                             "privateIPAddressVersion": "IPv4",
